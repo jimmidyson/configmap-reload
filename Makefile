@@ -23,7 +23,8 @@ GOARCH ?= $(shell go env GOARCH)
 BUILD_DIR ?= ./out
 ORG := github.com/jimmidyson
 REPOPATH ?= $(ORG)/configmap-reload
-BUILD_IMAGE ?= gcr.io/google_containers/kube-cross:v1.6.2-1
+DOCKER_IMAGE_NAME ?= jimmidyson/configmap-reload
+DOCKER_IMAGE_TAG ?= latest
 
 GOPATH := $(shell pwd)/_gopath
 
@@ -66,4 +67,4 @@ clean:
 
 .PHONY: docker
 docker: out/configmap-reload Dockerfile
-	docker build -t jimmidyson/configmap-reload:dev .
+	docker build -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
