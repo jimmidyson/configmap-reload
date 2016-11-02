@@ -1,10 +1,10 @@
-hash: 28f028d78f3a3ef3ace880226c6e8a4861f25b03306785ebe20057f7a0fa5626
-updated: 2016-08-10T17:29:20.047842064+01:00
+hash: 34237320d9ade755eb19dcc43bd6219d27fbb2c630e7bbf257e63b6d1e59c515
+updated: 2016-11-02T17:37:13.251138791Z
 imports:
 - name: golang.org/x/sys
-  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  version: 9c60d1c508f5134d1ca726b4641db998f2523357
   subpackages:
   - unix
 - name: gopkg.in/fsnotify.v1
-  version: a8a77c9133d2d6fd8334f3260d06f60e8d80a5fb
+  version: 629574ca2a5df945712d3079857300b5e4da0236
 testImports: []

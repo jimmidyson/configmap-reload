@@ -701,19 +701,17 @@ func TestGetMUIStringValue(t *testing.T) {
 	}
 	defer timezoneK.Close()
 
-	type testType struct {
+	var tests = []struct {
+		key  registry.Key
 		name string
 		want string
-	}
-	var tests = []testType{
-		{"MUI_Std", syscall.UTF16ToString(dtzi.StandardName[:])},
-	}
-	if dtzi.DynamicDaylightTimeDisabled == 0 {
-		tests = append(tests, testType{"MUI_Dlt", syscall.UTF16ToString(dtzi.DaylightName[:])})
+	}{
+		{timezoneK, "MUI_Std", syscall.UTF16ToString(dtzi.StandardName[:])},
+		{timezoneK, "MUI_Dlt", syscall.UTF16ToString(dtzi.DaylightName[:])},
 	}
 
 	for _, test := range tests {
-		got, err := timezoneK.GetMUIStringValue(test.name)
+		got, err := test.key.GetMUIStringValue(test.name)
 		if err != nil {
 			t.Error("GetMUIStringValue:", err)
 		}
