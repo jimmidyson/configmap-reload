@@ -6,8 +6,8 @@
 [![Dependency Status](https://dependencyci.com/github/jimmidyson/configmap-reload/badge)](https://dependencyci.com/github/jimmidyson/configmap-reload)
 [![CircleCI](https://img.shields.io/circleci/project/jimmidyson/configmap-reload.svg?maxAge=2592000)](https://circleci.com/gh/jimmidyson/configmap-reload)
 
-**configmap-reload** is a simple binary to trigger a reload when a Kubernetes ConfigMap is updated.
-It watches the mounted volume dir and notifies the target process that the config map has been changed.
+**configmap-reload** is a simple binary to trigger a reload when Kubernetes ConfigMaps are updated.
+It watches mounted volume dirs and notifies the target process that the config map has been changed.
 It currently only supports sending an HTTP request, but in future it is expected to support sending OS
 (e.g. SIGHUP) once Kubernetes supports pod PID namespaces.
 
@@ -17,14 +17,14 @@ It is available as a Docker image at https://hub.docker.com/r/jimmidyson/configm
 
 ```
 Usage of ./out/configmap-reload:
-  -volume-dir string
-        the config map volume directory to watch for updates
+  -volume-dir value
+        the config map volume directory to watch for updates; may be used multiple times
   -webhook-method string
         the HTTP method url to use to send the webhook (default "POST")
   -webhook-status-code int
         the HTTP status code indicating successful triggering of reload (default 200)
   -webhook-url string
-        the url to send a request to when the specified config map volume directory has been updated<Paste>
+        the url to send a request to when the specified config map volume directory has been updated
 ```
 
 ### License
