@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,15 +11,16 @@ import (
 	fsnotify "gopkg.in/fsnotify.v1"
 )
 
-var volumeDir = flag.String("volume-dir", "", "the config map volume directory to watch for updates")
+var volumeDirs volumeDirsFlag
 var webhook = flag.String("webhook-url", "", "the url to send a request to when the specified config map volume directory has been updated")
 var webhookMethod = flag.String("webhook-method", "POST", "the HTTP method url to use to send the webhook")
 var webhookStatusCode = flag.Int("webhook-status-code", 200, "the HTTP status code indicating successful triggering of reload")
 
 func main() {
+	flag.Var(&volumeDirs, "volume-dir", "the config map volume directory to watch for updates; may be used multiple times")
 	flag.Parse()
 
-	if *volumeDir == "" {
+	if len(volumeDirs) < 1 {
 		log.Println("Missing volume-dir")
 		log.Println()
 		flag.Usage()
@@ -69,9 +71,22 @@ func main() {
 		}
 	}()
 
-	err = watcher.Add(*volumeDir)
-	if err != nil {
-		log.Fatal(err)
+	for _, d := range volumeDirs {
+		err = watcher.Add(d)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	<-done
+}
+
+type volumeDirsFlag []string
+
+func (v *volumeDirsFlag) Set(value string) error {
+	*v = append(*v, value)
+	return nil
+}
+
+func (v *volumeDirsFlag) String() string {
+	return fmt.Sprint(*v)
 }
