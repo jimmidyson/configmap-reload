@@ -37,6 +37,11 @@ SRCFILES := go list  -f '{{join .Deps "\n"}}' ./configmap-reload.go | grep $(REP
 out/configmap-reload: out/configmap-reload-$(GOOS)-$(GOARCH)
 	cp $(BUILD_DIR)/configmap-reload-$(GOOS)-$(GOARCH) $(BUILD_DIR)/configmap-reload
 
+out/configmap-reload-linux-ppc64le: configmap-reload.go $(shell $(SRCFILES))
+	$(MKGOPATH)
+	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 GOARCH=ppc64le GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-ppc64le configmap-reload.go
+
+
 out/configmap-reload-darwin-amd64: configmap-reload.go $(shell $(SRCFILES))
 	$(MKGOPATH)
 	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-darwin-amd64 configmap-reload.go
