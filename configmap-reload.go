@@ -72,6 +72,7 @@ func main() {
 	}()
 
 	for _, d := range volumeDirs {
+		log.Printf("Watching directory: %q", d)
 		err = watcher.Add(d)
 		if err != nil {
 			log.Fatal(err)
