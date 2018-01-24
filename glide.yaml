@@ -1,4 +1,0 @@
-package: github.com/jimmidyson/inotify-reload
-import:
-- package: gopkg.in/fsnotify.v1
-  version: ^1.4.2

@@ -37,27 +37,27 @@ SRCFILES := go list  -f '{{join .Deps "\n"}}' ./configmap-reload.go | grep $(REP
 out/configmap-reload: out/configmap-reload-$(GOOS)-$(GOARCH)
 	cp $(BUILD_DIR)/configmap-reload-$(GOOS)-$(GOARCH) $(BUILD_DIR)/configmap-reload
 
-out/configmap-reload-linux-ppc64le: configmap-reload.go $(shell $(SRCFILES))
+out/configmap-reload-linux-ppc64le: vendor configmap-reload.go $(shell $(SRCFILES))
 	$(MKGOPATH)
 	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 GOARCH=ppc64le GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-ppc64le configmap-reload.go
 
 
-out/configmap-reload-darwin-amd64: configmap-reload.go $(shell $(SRCFILES))
+out/configmap-reload-darwin-amd64: vendor configmap-reload.go $(shell $(SRCFILES))
 	$(MKGOPATH)
 	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-darwin-amd64 configmap-reload.go
 
-out/configmap-reload-linux-amd64: configmap-reload.go $(shell $(SRCFILES))
+out/configmap-reload-linux-amd64: vendor configmap-reload.go $(shell $(SRCFILES))
 	$(MKGOPATH)
 	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-amd64 configmap-reload.go
 
-out/configmap-reload-windows-amd64.exe: configmap-reload.go $(shell $(SRCFILES))
+out/configmap-reload-windows-amd64.exe: vendor configmap-reload.go $(shell $(SRCFILES))
 	$(MKGOPATH)
 	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-windows-amd64.exe configmap-reload.go
 
 .PHONY: cross
 cross: out/configmap-reload-linux-amd64 out/configmap-reload-darwin-amd64 out/configmap-reload-windows-amd64.exe
 
-.PHONE: checksum
+.PHONY: checksum
 checksum:
 	for f in out/localkube out/configmap-reload-linux-amd64 out/configmap-reload-darwin-amd64 out/configmap-reload-windows-amd64.exe ; do \
 		if [ -f "$${f}" ]; then \
@@ -65,10 +65,20 @@ checksum:
 		fi ; \
 	done
 
+PHONY: vendor
+vendor: .vendor
+
+.vendor: Gopkg.toml Gopkg.lock
+	command -v dep >/dev/null 2>&1 || go get github.com/golang/dep/cmd/dep
+	$(MKGOPATH)
+	cd $(GOPATH)/src/$(REPOPATH) && dep ensure -v
+	@touch $@
+
 .PHONY: clean
 clean:
 	rm -rf $(GOPATH)
 	rm -rf $(BUILD_DIR)
+	rm -f .vendor
 
 .PHONY: docker
 docker: out/configmap-reload Dockerfile
