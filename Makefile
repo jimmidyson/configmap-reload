@@ -54,12 +54,20 @@ out/configmap-reload-windows-amd64.exe: vendor configmap-reload.go $(shell $(SRC
 	$(MKGOPATH)
 	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-windows-amd64.exe configmap-reload.go
 
+out/configmap-reload-linux-arm: vendor configmap-reload.go $(shell $(SRCFILES))
+	$(MKGOPATH)
+	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 GOARM=7 GOARCH=arm GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-arm configmap-reload.go
+
+out/configmap-reload-linux-arm64: vendor configmap-reload.go $(shell $(SRCFILES))
+	$(MKGOPATH)
+	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 GOARCH=arm64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-arm64 configmap-reload.go
+
 .PHONY: cross
-cross: out/configmap-reload-linux-amd64 out/configmap-reload-darwin-amd64 out/configmap-reload-windows-amd64.exe
+cross: out/configmap-reload-linux-amd64 out/configmap-reload-darwin-amd64 out/configmap-reload-windows-amd64.exe out/configmap-reload-linux-arm out/configmap-reload-linux-arm64
 
 .PHONY: checksum
 checksum:
-	for f in out/localkube out/configmap-reload-linux-amd64 out/configmap-reload-darwin-amd64 out/configmap-reload-windows-amd64.exe ; do \
+	for f in out/localkube out/configmap-reload-linux-amd64 out/configmap-reload-darwin-amd64 out/configmap-reload-windows-amd64.exe out/configmap-reload-linux-arm out/configmap-reload-linux-arm64 ; do \
 		if [ -f "$${f}" ]; then \
 			openssl sha256 "$${f}" | awk '{print $$2}' > "$${f}.sha256" ; \
 		fi ; \
