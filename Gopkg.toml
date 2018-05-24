@@ -5,3 +5,10 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+# Fixes https://github.com/golang/dep/issues/1760
+
+[[override]]
+  name = "gopkg.in/fsnotify.v1"
+  version = "1.2.9"
+  source = "git@github.com:fsnotify/fsnotify"
