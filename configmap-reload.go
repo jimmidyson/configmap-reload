@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	fsnotify "gopkg.in/fsnotify.v1"
+	fsnotify "github.com/fsnotify/fsnotify"
 )
 
 var volumeDirs volumeDirsFlag

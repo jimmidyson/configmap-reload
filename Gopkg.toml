@@ -1,5 +1,5 @@
 [[constraint]]
-  name = "gopkg.in/fsnotify.v1"
+  name = "github.com/fsnotify/fsnotify"
   version = "1.4.7"
 
 [prune]
