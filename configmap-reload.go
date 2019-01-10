@@ -25,6 +25,11 @@ var (
 	listenAddress     = flag.String("web.listen-address", ":9533", "Address to listen on for web interface and telemetry.")
 	metricPath        = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
 
+	lastReloadError = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "last_reload_error",
+		Help:      "Whether the last reload resulted in an error (1 for error, 0 for success)",
+	}, []string{"webhook"})
 	requestDuration = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: namespace,
 		Name:      "last_request_duration_seconds",
@@ -53,6 +58,7 @@ var (
 )
 
 func init() {
+	prometheus.MustRegister(lastReloadError)
 	prometheus.MustRegister(requestDuration)
 	prometheus.MustRegister(successReloads)
 	prometheus.MustRegister(requestErrorsByReason)
@@ -105,25 +111,24 @@ func main() {
 					begun := time.Now()
 					req, err := http.NewRequest(*webhookMethod, h, nil)
 					if err != nil {
-						requestErrorsByReason.WithLabelValues(h, "client_request_create").Inc()
+						setFailureMetrics(h, "client_request_create")
 						log.Println("error:", err)
 						continue
 					}
 					resp, err := http.DefaultClient.Do(req)
 					if err != nil {
-						requestErrorsByReason.WithLabelValues(h, "client_request_do").Inc()
+						setFailureMetrics(h, "client_request_do")
 						log.Println("error:", err)
 						continue
 					}
 					resp.Body.Close()
 					requestsByStatusCode.WithLabelValues(h, strconv.Itoa(resp.StatusCode)).Inc()
 					if resp.StatusCode != *webhookStatusCode {
-						requestErrorsByReason.WithLabelValues(h, "client_response").Inc()
+						setFailureMetrics(h, "client_response")
 						log.Println("error:", "Received response code", resp.StatusCode, ", expected", *webhookStatusCode)
 						continue
 					}
-					requestDuration.WithLabelValues(h).Set(time.Since(begun).Seconds())
-					successReloads.WithLabelValues(h).Inc()
+					setSuccessMetrict(h, begun)
 					log.Println("successfully triggered reload")
 				}
 			case err := <-watcher.Errors:
@@ -141,6 +146,17 @@ func main() {
 		}
 	}
 	<-done
+}
+
+func setFailureMetrics(h, reason string) {
+	requestErrorsByReason.WithLabelValues(h, reason).Inc()
+	lastReloadError.WithLabelValues(h).Set(1.0)
+}
+
+func setSuccessMetrict(h string, begun time.Time) {
+	requestDuration.WithLabelValues(h).Set(time.Since(begun).Seconds())
+	successReloads.WithLabelValues(h).Inc()
+	lastReloadError.WithLabelValues(h).Set(0.0)
 }
 
 func isValidEvent(event fsnotify.Event) bool {
