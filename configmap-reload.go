@@ -43,12 +43,12 @@ var (
 	requestErrorsByReason = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
 		Name:      "request_errors_total",
-		Help:      "Total errors while requesting reload by reason",
+		Help:      "Total request errors by reason",
 	}, []string{"webhook", "reason"})
 	watcherErrors = prometheus.NewCounter(prometheus.CounterOpts{
 		Namespace: namespace,
 		Name:      "watcher_errors_total",
-		Help:      "Total errors while requesting reload by reason",
+		Help:      "Total filesystem watcher errors",
 	})
 	requestsByStatusCode = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
