@@ -85,20 +85,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	go func() {
-		err := serverMetrics(*listenAddress, *metricPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer watcher.Close()
 
-	done := make(chan bool)
 	go func() {
 		for {
 			select {
@@ -145,7 +137,8 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	<-done
+
+	log.Fatal(serverMetrics(*listenAddress, *metricPath))
 }
 
 func setFailureMetrics(h, reason string) {
