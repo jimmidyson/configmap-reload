@@ -22,7 +22,7 @@ var (
 	webhook           webhookFlag
 	webhookMethod     = flag.String("webhook-method", "POST", "the HTTP method url to use to send the webhook")
 	webhookStatusCode = flag.Int("webhook-status-code", 200, "the HTTP status code indicating successful triggering of reload")
-	listenAddress     = flag.String("web.listen-address", ":9355", "Address to listen on for web interface and telemetry.")
+	listenAddress     = flag.String("web.listen-address", ":9533", "Address to listen on for web interface and telemetry.")
 	metricPath        = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
 
 	requestDuration = prometheus.NewGaugeVec(prometheus.GaugeOpts{
