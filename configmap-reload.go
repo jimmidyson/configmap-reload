@@ -169,6 +169,22 @@ func isValidEvent(event fsnotify.Event) bool {
 	return true
 }
 
+func serverMetrics(listenAddress, metricsPath string) error {
+	http.Handle(metricsPath, promhttp.Handler())
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`
+			<html>
+			<head><title>ConfigMap Reload Metrics</title></head>
+			<body>
+			<h1>ConfigMap Reload</h1>
+			<p><a href='` + metricsPath + `'>Metrics</a></p>
+			</body>
+			</html>
+		`))
+	})
+	return http.ListenAndServe(listenAddress, nil)
+}
+
 type volumeDirsFlag []string
 type webhookFlag []string
 
@@ -188,20 +204,4 @@ func (v *webhookFlag) Set(value string) error {
 
 func (v *webhookFlag) String() string {
 	return fmt.Sprint(*v)
-}
-
-func serverMetrics(listenAddress, metricsPath string) error {
-	http.Handle(metricsPath, promhttp.Handler())
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`
-			<html>
-			<head><title>ConfigMap Reload Metrics</title></head>
-			<body>
-			<h1>ConfigMap Reload</h1>
-			<p><a href='` + metricsPath + `'>Metrics</a></p>
-			</body>
-			</html>
-		`))
-	})
-	return http.ListenAndServe(listenAddress, nil)
 }
