@@ -1,7 +1,0 @@
-[[constraint]]
-  name = "github.com/fsnotify/fsnotify"
-  version = "1.4.7"
-
-[prune]
-  go-tests = true
-  unused-packages = true
