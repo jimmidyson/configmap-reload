@@ -2,10 +2,11 @@ job_defaults: &job_defaults
   working_directory: /go/src/github.com/jimmidyson/configmap-reload
 
   docker:
-  - image: golang:1.9.2
+  - image: golang:1.12.6
 
   environment: &env_defaults
   - CGO_ENABLED: "0"
+  - GO111MODULE: "on"
 
 version: 2
 
@@ -21,31 +22,6 @@ jobs:
           paths:
           - /go/src/github.com/jimmidyson/configmap-reload
 
-  vendor_dependencies:
-    <<: *job_defaults
-
-    steps:
-      - restore_cache:
-          keys:
-          - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
-
-      - restore_cache:
-          keys:
-          - vendor-{{ checksum "Gopkg.lock" }}
-
-      - run:
-          name: Update dependencies
-          command: |
-            if [ ! -d "vendor" ]; then
-              command -v dep >/dev/null 2>&1 || go get github.com/golang/dep/cmd/dep
-              dep ensure -v -vendor-only
-            fi
-
-      - save_cache:
-          key: vendor-{{ checksum "Gopkg.lock" }}
-          paths:
-          - /go/src/github.com/jimmidyson/configmap-reload/vendor
-
   build:
     <<: *job_defaults
 
@@ -53,37 +29,35 @@ jobs:
       - restore_cache:
           keys:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
-
+      
       - restore_cache:
           keys:
-          - vendor-{{ checksum "Gopkg.lock" }}
+          - gomod-cache-{{ checksum "go.sum" }}
 
       - run:
           name: Build binary
 
-          command: |
-            ROOT_PKG=$(go list .)
-            VERSION=$(git describe --match 'v[0-9]*' --dirty --always)
-            BUILD_DATE=$(date -u)
-            go build -v                                                                                                           \
-                -installsuffix "static"                                                                                           \
-                -ldflags "-X ${ROOT_PKG}/pkg/version.AppVersion=${VERSION} -X '${ROOT_PKG}/pkg/version.BuildDate=${BUILD_DATE}'"  \
-                -o out/configmap-reload \
-                .
+          command: make cross out/configmap-reload
+
       - persist_to_workspace:
           root: .
           paths:
-          - out/configmap-reload
+          - out/configmap-reload*
 
       - store_artifacts:
-          path: ./out/configmap-reload
-          destination: out/configmap-reload
+          path: ./out
+          destination: out/
+
+      - save_cache:
+          key: gomod-cache-{{ checksum "go.sum" }}
+          paths:
+          - /go/pkg/mod
 
   build_docker:
     <<: *job_defaults
 
     docker:
-    - image: docker:18.01.0-ce-git
+    - image: docker:18.09.3-git
 
     steps:
       - restore_cache:
@@ -91,7 +65,7 @@ jobs:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
 
       - setup_remote_docker:
-          version: 17.11.0-ce
+          version: 18.09.3
 
       - attach_workspace:
           at: .
@@ -99,12 +73,14 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            docker build \
-              -t jimmidyson/configmap-reload:${CIRCLE_SHA1} .
+            apk add -U make
+            make docker GOOS=linux GOARCH=amd64 DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
+
       - run:
           name: Export Docker image
           command: |
             docker save -o ./configmap-reload-docker.tar jimmidyson/configmap-reload:${CIRCLE_SHA1}
+
       - persist_to_workspace:
           root: .
           paths:
@@ -118,11 +94,11 @@ jobs:
     <<: *job_defaults
 
     docker:
-    - image: docker:18.01.0-ce-git
+    - image: docker:18.09.3-git
 
     steps:
       - setup_remote_docker:
-          version: 17.11.0-ce
+          version: 18.09.3
 
       - attach_workspace:
           at: .
@@ -153,16 +129,9 @@ workflows:
           tags:
             only:
               /v[0-9]+(\.[0-9]+)*/
-    - vendor_dependencies:
-        requires:
-        - checkout_code
-        filters:
-          tags:
-            only:
-              /v[0-9]+(\.[0-9]+)*/
     - build:
         requires:
-        - vendor_dependencies
+        - checkout_code
         filters:
           tags:
             only:
