@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -101,26 +102,32 @@ func main() {
 				log.Println("config map updated")
 				for _, h := range webhook {
 					begun := time.Now()
-					req, err := http.NewRequest(*webhookMethod, h, nil)
+					req, err := http.NewRequest(*webhookMethod, h.String(), nil)
 					if err != nil {
-						setFailureMetrics(h, "client_request_create")
+						setFailureMetrics(h.String(), "client_request_create")
 						log.Println("error:", err)
 						continue
 					}
+					userInfo := h.User
+					if userInfo != nil {
+						if password, passwordSet := userInfo.Password(); passwordSet {
+							req.SetBasicAuth(userInfo.Username(), password)
+						}
+					}
 					resp, err := http.DefaultClient.Do(req)
 					if err != nil {
-						setFailureMetrics(h, "client_request_do")
+						setFailureMetrics(h.String(), "client_request_do")
 						log.Println("error:", err)
 						continue
 					}
 					resp.Body.Close()
-					requestsByStatusCode.WithLabelValues(h, strconv.Itoa(resp.StatusCode)).Inc()
+					requestsByStatusCode.WithLabelValues(h.String(), strconv.Itoa(resp.StatusCode)).Inc()
 					if resp.StatusCode != *webhookStatusCode {
-						setFailureMetrics(h, "client_response")
+						setFailureMetrics(h.String(), "client_response")
 						log.Println("error:", "Received response code", resp.StatusCode, ", expected", *webhookStatusCode)
 						continue
 					}
-					setSuccessMetrict(h, begun)
+					setSuccessMetrict(h.String(), begun)
 					log.Println("successfully triggered reload")
 				}
 			case err := <-watcher.Errors:
@@ -179,7 +186,8 @@ func serverMetrics(listenAddress, metricsPath string) error {
 }
 
 type volumeDirsFlag []string
-type webhookFlag []string
+
+type webhookFlag []*url.URL
 
 func (v *volumeDirsFlag) Set(value string) error {
 	*v = append(*v, value)
@@ -191,7 +199,11 @@ func (v *volumeDirsFlag) String() string {
 }
 
 func (v *webhookFlag) Set(value string) error {
-	*v = append(*v, value)
+	u, err := url.Parse(value)
+	if err != nil {
+		return fmt.Errorf("invalid URL: %v", err)
+	}
+	*v = append(*v, u)
 	return nil
 }
 
