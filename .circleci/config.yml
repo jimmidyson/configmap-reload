@@ -99,6 +99,7 @@ jobs:
             fi
             DOCKER_IMAGE_TAG=${CIRCLE_TAG:-latest}
             docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASSWORD}
+            apk add -U make bash
             make push
 
 workflows:
