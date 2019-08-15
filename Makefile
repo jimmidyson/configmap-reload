@@ -30,32 +30,21 @@ LDFLAGS := -s -w -extldflags '-static'
 SRCFILES := $(shell find . ! -path './out/*' ! -path './.git/*' -type f)
 
 ALL_ARCH=amd64 arm arm64 ppc64le s390x
-ML_PLATFORMS=linux/amd64,linux/arm,linux/arm64,linux/ppc64le,linux/s390x
+ML_PLATFORMS=$(addprefix linux/,$(ALL_ARCH))
 ALL_BINARIES ?= $(addprefix out/configmap-reload-, \
-									$(addprefix linux-,amd64 ppc64le s390x arm arm64) \
+									$(addprefix linux-,$(ALL_ARCH)) \
 									darwin-amd64 \
 									windows-amd64.exe)
 
-ifeq ($(GOARCH),amd64)
-	BASEIMAGE?=busybox
-	BINARY=configmap-reload-linux-amd64
-endif
-ifeq ($(GOARCH),arm)
-	BASEIMAGE?=armhf/busybox
-	BINARY=configmap-reload-linux-arm
-endif
-ifeq ($(GOARCH),arm64)
-	BASEIMAGE?=aarch64/busybox
-	BINARY=configmap-reload-linux-arm64
-endif
-ifeq ($(GOARCH),ppc64le)
-	BASEIMAGE?=ppc64le/busybox
-	BINARY=configmap-reload-linux-ppc64le
-endif
-ifeq ($(GOARCH),s390x)
-	BASEIMAGE?=s390x/busybox
-	BINARY=configmap-reload-linux-s390x
-endif
+DEFAULT_BASEIMAGE_amd64   := busybox
+DEFAULT_BASEIMAGE_arm     := armhf/busybox
+DEFAULT_BASEIMAGE_arm64   := aarch64/busybox
+DEFAULT_BASEIMAGE_ppc64le := ppc64le/busybox
+DEFAULT_BASEIMAGE_s390x   := s390x/busybox
+
+BASEIMAGE ?= $(DEFAULT_BASEIMAGE_$(GOARCH))
+
+BINARY=configmap-reload-linux-$(GOARCH)
 
 out/configmap-reload: out/configmap-reload-$(GOOS)-$(GOARCH)
 	cp out/configmap-reload-$(GOOS)-$(GOARCH) out/configmap-reload
@@ -85,7 +74,7 @@ docker: out/configmap-reload-$(GOOS)-$(GOARCH) Dockerfile
 	docker build --build-arg BASEIMAGE=$(BASEIMAGE) --build-arg BINARY=$(BINARY) -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$(GOARCH) .
 
 ./manifest-tool:
-	curl -sSL https://github.com/estesp/manifest-tool/releases/download/v0.5.0/manifest-tool-linux-amd64 > manifest-tool
+	curl -fsSL https://github.com/estesp/manifest-tool/releases/download/v0.5.0/manifest-tool-linux-amd64 > manifest-tool
 	chmod +x manifest-tool
 
 push-%:
