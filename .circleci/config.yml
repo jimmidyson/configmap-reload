@@ -83,6 +83,10 @@ jobs:
     - image: docker:18.09.3-git
 
     steps:
+      - restore_cache:
+          keys:
+          - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
+
       - setup_remote_docker:
           version: 18.09.3
 
