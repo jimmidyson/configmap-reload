@@ -75,20 +75,10 @@ jobs:
           command: |
             apk add -U make bash
             make docker GOOS=linux GOARCH=amd64 DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
-
-      - run:
-          name: Export Docker image
-          command: |
-            docker save -o ./configmap-reload-docker.tar jimmidyson/configmap-reload:${CIRCLE_SHA1}
-
-      - persist_to_workspace:
-          root: .
-          paths:
-          - configmap-reload-docker.tar
-
-      - store_artifacts:
-          path: ./configmap-reload-docker.tar
-          destination: configmap-reload-docker.tar
+            make docker GOOS=linux GOARCH=arm DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
+            make docker GOOS=linux GOARCH=arm64 DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
+            make docker GOOS=linux GOARCH=ppc64le DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
+            make docker GOOS=linux GOARCH=s390x DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
 
   push_docker:
     <<: *job_defaults
@@ -99,9 +89,6 @@ jobs:
     steps:
       - setup_remote_docker:
           version: 18.09.3
-
-      - attach_workspace:
-          at: .
 
       - run:
           name: Push Docker image
@@ -114,11 +101,9 @@ jobs:
               echo "Missing Docker login information!!!"
               exit 1
             fi
-            docker load -q -i ./configmap-reload-docker.tar
-            DOCKER_TAG=${CIRCLE_TAG:-latest}
-            docker tag jimmidyson/configmap-reload:${CIRCLE_SHA1} jimmidyson/configmap-reload:${DOCKER_TAG}
+            DOCKER_IMAGE_TAG=${CIRCLE_TAG:-latest}
             docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASSWORD}
-            docker push jimmidyson/configmap-reload:${DOCKER_TAG}
+            make push
 
 workflows:
   version: 2
