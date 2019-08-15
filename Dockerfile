@@ -1,6 +1,9 @@
-FROM gcr.io/distroless/base
-USER	65534
+ARG BASEIMAGE=busybox
+FROM $BASEIMAGE
 
-COPY out/configmap-reload /configmap-reload
+USER 65534
+
+ARG BINARY=configmap-reload
+COPY out/$BINARY /configmap-reload
 
 ENTRYPOINT ["/configmap-reload"]
