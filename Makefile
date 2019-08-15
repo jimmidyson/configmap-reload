@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+SHELL := /bin/bash -euo pipefail
+
 # Use the native vendor/ dependency system
 export GO111MODULE := on
 export CGO_ENABLED := 0
 
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
-BUILD_DIR ?= ./out
 ORG := github.com/jimmidyson
 REPOPATH ?= $(ORG)/configmap-reload
 DOCKER_IMAGE_NAME ?= jimmidyson/configmap-reload
@@ -28,33 +29,25 @@ LDFLAGS := -s -w -extldflags '-static'
 
 SRCFILES := $(shell find . ! -path './out/*' ! -path './.git/*' -type f)
 
+ALL_BINARIES ?= $(addprefix out/configmap-reload-, \
+									$(addprefix linux-,amd64 ppc64le s390x arm64) \
+									darwin-amd64 \
+									windows-amd64.exe)
+
 out/configmap-reload: out/configmap-reload-$(GOOS)-$(GOARCH)
-	cp $(BUILD_DIR)/configmap-reload-$(GOOS)-$(GOARCH) $(BUILD_DIR)/configmap-reload
+	cp out/configmap-reload-$(GOOS)-$(GOARCH) out/configmap-reload
 
-out/configmap-reload-darwin-amd64: $(SRCFILES)
-	GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-darwin-amd64 configmap-reload.go
-
-out/configmap-reload-linux-ppc64le: $(SRCFILES)
-	GOARCH=ppc64le GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-ppc64le configmap-reload.go
-
-out/configmap-reload-linux-s390x: $(SRCFILES)
-	GOARCH=s390x GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-s390x configmap-reload.go
-
-out/configmap-reload-linux-arm64: $(SRCFILES)
-	GOARCH=arm64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-arm64 configmap-reload.go
-
-out/configmap-reload-linux-amd64: $(SRCFILES)
-	GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-amd64 configmap-reload.go
-
-out/configmap-reload-windows-amd64.exe: $(SRCFILES)
-	GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-windows-amd64.exe configmap-reload.go
+out/configmap-reload-%: $(SRCFILES)
+	GOARCH=$(word 2,$(subst -, ,$(*:.exe=))) GOOS=$(word 1,$(subst -, ,$(*:.exe=))) \
+		go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a \
+		-o $@ configmap-reload.go
 
 .PHONY: cross
-cross: out/configmap-reload-linux-amd64 out/configmap-reload-darwin-amd64 out/configmap-reload-windows-amd64.exe
+cross: $(ALL_BINARIES)
 
 .PHONY: checksum
 checksum:
-	for f in out/configmap-reload-linux-amd64 out/configmap-reload-darwin-amd64 out/configmap-reload-windows-amd64.exe ; do \
+	for f in $(ALL_BINARIES) ; do \
 		if [ -f "$${f}" ]; then \
 			openssl sha256 "$${f}" | awk '{print $$2}' > "$${f}.sha256" ; \
 		fi ; \
@@ -62,7 +55,7 @@ checksum:
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf out
 
 .PHONY: docker
 docker: out/configmap-reload Dockerfile
