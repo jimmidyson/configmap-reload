@@ -29,10 +29,22 @@ LDFLAGS := -s -w -extldflags '-static'
 
 SRCFILES := $(shell find . ! -path './out/*' ! -path './.git/*' -type f)
 
+ALL_ARCH=amd64 arm arm64 ppc64le s390x
+ML_PLATFORMS=$(addprefix linux/,$(ALL_ARCH))
 ALL_BINARIES ?= $(addprefix out/configmap-reload-, \
-									$(addprefix linux-,amd64 ppc64le s390x arm64) \
+									$(addprefix linux-,$(ALL_ARCH)) \
 									darwin-amd64 \
 									windows-amd64.exe)
+
+DEFAULT_BASEIMAGE_amd64   := busybox
+DEFAULT_BASEIMAGE_arm     := armhf/busybox
+DEFAULT_BASEIMAGE_arm64   := aarch64/busybox
+DEFAULT_BASEIMAGE_ppc64le := ppc64le/busybox
+DEFAULT_BASEIMAGE_s390x   := s390x/busybox
+
+BASEIMAGE ?= $(DEFAULT_BASEIMAGE_$(GOARCH))
+
+BINARY=configmap-reload-linux-$(GOARCH)
 
 out/configmap-reload: out/configmap-reload-$(GOOS)-$(GOARCH)
 	cp out/configmap-reload-$(GOOS)-$(GOARCH) out/configmap-reload
@@ -58,5 +70,16 @@ clean:
 	rm -rf out
 
 .PHONY: docker
-docker: out/configmap-reload Dockerfile
-	docker build -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
+docker: out/configmap-reload-$(GOOS)-$(GOARCH) Dockerfile
+	docker build --build-arg BASEIMAGE=$(BASEIMAGE) --build-arg BINARY=$(BINARY) -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$(GOARCH) .
+
+./manifest-tool:
+	curl -fsSL https://github.com/estesp/manifest-tool/releases/download/v0.5.0/manifest-tool-linux-amd64 > manifest-tool
+	chmod +x manifest-tool
+
+push-%:
+	$(MAKE) GOARCH=$* docker
+	docker push $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$*
+
+push: ./manifest-tool $(addprefix push-,$(ALL_ARCH))
+	./manifest-tool push from-args --platforms $(ML_PLATFORMS) --template $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-ARCH --target $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
