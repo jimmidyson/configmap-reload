@@ -73,13 +73,18 @@ clean:
 docker: out/configmap-reload-$(GOOS)-$(GOARCH) Dockerfile
 	docker build --build-arg BASEIMAGE=$(BASEIMAGE) --build-arg BINARY=$(BINARY) -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$(GOARCH) .
 
-./manifest-tool:
+manifest-tool:
 	curl -fsSL https://github.com/estesp/manifest-tool/releases/download/v0.5.0/manifest-tool-linux-amd64 > manifest-tool
 	chmod +x manifest-tool
 
+.PHONY: push-%
 push-%:
 	$(MAKE) GOARCH=$* docker
 	docker push $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$*
 
-push: ./manifest-tool $(addprefix push-,$(ALL_ARCH))
+.PHONY: push
+push: manifest-tool $(addprefix push-,$(ALL_ARCH)) manifest-push
+
+.PHONY: manifest-push
+manifest-push: manifest-tool
 	./manifest-tool push from-args --platforms $(ML_PLATFORMS) --template $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-ARCH --target $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
