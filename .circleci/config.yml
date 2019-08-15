@@ -65,7 +65,7 @@ jobs:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
 
       - setup_remote_docker:
-          version: 19.03.1
+          version: 18.09.3
 
       - attach_workspace:
           at: .
@@ -98,7 +98,7 @@ jobs:
 
     steps:
       - setup_remote_docker:
-          version: 19.03.1
+          version: 18.09.3
 
       - attach_workspace:
           at: .
