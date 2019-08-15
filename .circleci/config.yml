@@ -74,11 +74,7 @@ jobs:
           name: Build Docker image
           command: |
             apk add -U make bash
-            make docker GOOS=linux GOARCH=amd64 DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
-            make docker GOOS=linux GOARCH=arm DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
-            make docker GOOS=linux GOARCH=arm64 DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
-            make docker GOOS=linux GOARCH=ppc64le DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
-            make docker GOOS=linux GOARCH=s390x DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
+            for i in amd64 arm arm64 ppc64le s390x; do make docker GOOS=linux GOARCH=$i DOCKER_IMAGE_TAG=${CIRCLE_SHA1}; done
 
   push_docker:
     <<: *job_defaults
