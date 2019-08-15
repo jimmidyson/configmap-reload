@@ -31,11 +31,17 @@ SRCFILES := $(shell find . ! -path './out/*' ! -path './.git/*' -type f)
 out/configmap-reload: out/configmap-reload-$(GOOS)-$(GOARCH)
 	cp $(BUILD_DIR)/configmap-reload-$(GOOS)-$(GOARCH) $(BUILD_DIR)/configmap-reload
 
+out/configmap-reload-darwin-amd64: $(SRCFILES)
+	GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-darwin-amd64 configmap-reload.go
+
 out/configmap-reload-linux-ppc64le: $(SRCFILES)
 	GOARCH=ppc64le GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-ppc64le configmap-reload.go
 
-out/configmap-reload-darwin-amd64: $(SRCFILES)
-	GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-darwin-amd64 configmap-reload.go
+out/configmap-reload-linux-s390x: $(SRCFILES)
+	GOARCH=s390x GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-s390x configmap-reload.go
+
+out/configmap-reload-linux-arm64: $(SRCFILES)
+	GOARCH=arm64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-arm64 configmap-reload.go
 
 out/configmap-reload-linux-amd64: $(SRCFILES)
 	GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -a -o $(BUILD_DIR)/configmap-reload-linux-amd64 configmap-reload.go
