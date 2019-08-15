@@ -73,7 +73,7 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            apk add -U make
+            apk add -U make bash
             make docker GOOS=linux GOARCH=amd64 DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
 
       - run:
