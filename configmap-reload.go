@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	fsnotify "github.com/fsnotify/fsnotify"
@@ -21,6 +22,7 @@ const namespace = "configmap_reload"
 var (
 	volumeDirs        volumeDirsFlag
 	webhook           webhookFlag
+	webhookHeaders    headersFlag
 	webhookMethod     = flag.String("webhook-method", "POST", "the HTTP method url to use to send the webhook")
 	webhookStatusCode = flag.Int("webhook-status-code", 200, "the HTTP status code indicating successful triggering of reload")
 	listenAddress     = flag.String("web.listen-address", ":9533", "Address to listen on for web interface and telemetry.")
@@ -70,6 +72,7 @@ func init() {
 func main() {
 	flag.Var(&volumeDirs, "volume-dir", "the config map volume directory to watch for updates; may be used multiple times")
 	flag.Var(&webhook, "webhook-url", "the url to send a request to when the specified config map volume directory has been updated")
+	flag.Var(&webhookHeaders, "webhook-headers", "comma-separated list of HTTP headers to send")
 	flag.Parse()
 
 	if len(volumeDirs) < 1 {
@@ -103,6 +106,9 @@ func main() {
 				for _, h := range webhook {
 					begun := time.Now()
 					req, err := http.NewRequest(*webhookMethod, h.String(), nil)
+
+					setHeaders(req)
+
 					if err != nil {
 						setFailureMetrics(h.String(), "client_request_create")
 						log.Println("error:", err)
@@ -185,9 +191,21 @@ func serverMetrics(listenAddress, metricsPath string) error {
 	return http.ListenAndServe(listenAddress, nil)
 }
 
+func setHeaders(req *http.Request) {
+	for _, h := range webhookHeaders {
+		kv := strings.Split(h, ":")
+		if len(kv) != 2 {
+			panic(fmt.Sprintf("specified header '%s' is invalid", h))
+		}
+		req.Header.Add(kv[0], kv[1])
+	}
+}
+
 type volumeDirsFlag []string
 
 type webhookFlag []*url.URL
+
+type headersFlag []string
 
 func (v *volumeDirsFlag) Set(value string) error {
 	*v = append(*v, value)
@@ -209,4 +227,13 @@ func (v *webhookFlag) Set(value string) error {
 
 func (v *webhookFlag) String() string {
 	return fmt.Sprint(*v)
+}
+
+func (i *headersFlag) String() string {
+	return "my string representation"
+}
+
+func (i *headersFlag) Set(value string) error {
+	*i = append(*i, value)
+	return nil
 }
