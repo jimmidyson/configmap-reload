@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strconv"
 	"time"
 
@@ -160,12 +159,6 @@ func setSuccessMetrict(h string, begun time.Time) {
 }
 
 func isValidEvent(event fsnotify.Event) bool {
-	if event.Op&fsnotify.Create != fsnotify.Create {
-		return false
-	}
-	if filepath.Base(event.Name) != "..data" {
-		return false
-	}
 	return true
 }
 
