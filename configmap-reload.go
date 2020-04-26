@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	fsnotify "github.com/fsnotify/fsnotify"
@@ -25,6 +25,7 @@ var (
 	webhookStatusCode = flag.Int("webhook-status-code", 200, "the HTTP status code indicating successful triggering of reload")
 	listenAddress     = flag.String("web.listen-address", ":9533", "Address to listen on for web interface and telemetry.")
 	metricPath        = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
+	fileToWatch       = flag.String("file-to-watch", "", "If we want to trigger update only when specific file is updated")
 
 	lastReloadError = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: namespace,
@@ -163,9 +164,10 @@ func isValidEvent(event fsnotify.Event) bool {
 	if event.Op&fsnotify.Create != fsnotify.Create {
 		return false
 	}
-	if filepath.Base(event.Name) != "..data" {
+	if len(*fileToWatch) > 0 && !strings.Contains(event.Name, *fileToWatch) {
 		return false
 	}
+	log.Printf("Valid Event: %v", event)
 	return true
 }
 
