@@ -2,7 +2,7 @@ job_defaults: &job_defaults
   working_directory: /go/src/github.com/jimmidyson/configmap-reload
 
   docker:
-  - image: golang:1.12.7
+  - image: golang:1.14-alpine
 
   environment: &env_defaults
   - CGO_ENABLED: "0"
@@ -37,7 +37,9 @@ jobs:
       - run:
           name: Build binary
 
-          command: make cross out/configmap-reload
+          command: |
+            apk add -U make bash
+            make cross out/configmap-reload
 
       - persist_to_workspace:
           root: .
