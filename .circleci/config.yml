@@ -1,14 +1,25 @@
+version: 2.1
+
 job_defaults: &job_defaults
   working_directory: /go/src/github.com/jimmidyson/configmap-reload
 
   docker:
   - image: golang:1.14-alpine
 
-  environment: &env_defaults
-  - CGO_ENABLED: "0"
-  - GO111MODULE: "on"
+  environment:
+    CGO_ENABLED: "0"
+    GO111MODULE: "on"
 
-version: 2
+docker_job_defaults: &docker_job_defaults
+  working_directory: /go/src/github.com/jimmidyson/configmap-reload
+
+  docker:
+  - image: jimmidyson/docker-with-buildx:stable-git
+
+  environment:
+    CGO_ENABLED: "0"
+    GO111MODULE: "on"
+    DOCKER_CLI_EXPERIMENTAL: "enabled"
 
 jobs:
   checkout_code:
@@ -22,44 +33,38 @@ jobs:
           paths:
           - /go/src/github.com/jimmidyson/configmap-reload
 
-  build:
-    <<: *job_defaults
+  build_docker_buildx:
+    <<: *docker_job_defaults
+
+    docker:
+      - image: docker:stable-git
 
     steps:
+      
       - restore_cache:
           keys:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
       
-      - restore_cache:
-          keys:
-          - gomod-cache-{{ checksum "go.sum" }}
-
+      - setup_remote_docker:
+          version: 19.03.8
+      
       - run:
-          name: Build binary
-
+          name: Build and push Docker buildx image
           command: |
-            apk add -U make bash
-            make cross out/configmap-reload
-
-      - persist_to_workspace:
-          root: .
-          paths:
-          - out/configmap-reload*
-
-      - store_artifacts:
-          path: ./out
-          destination: out/
-
-      - save_cache:
-          key: gomod-cache-{{ checksum "go.sum" }}
-          paths:
-          - /go/pkg/mod
+            if [ "${CIRCLE_PROJECT_USERNAME}" != "jimmidyson" ]; then
+              echo "Skipping - this is not in origin repository"
+              exit 0
+            fi
+            if [ -z "${DOCKER_LOGIN}" ] || [ -z "${DOCKER_PASSWORD}" ]; then
+              echo "Missing Docker login information!!!"
+              exit 1
+            fi
+            docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASSWORD}
+            docker build -t jimmidyson/docker-with-buildx:stable-git -f Dockerfile.buildx .
+            docker push jimmidyson/docker-with-buildx:stable-git
 
   build_docker:
-    <<: *job_defaults
-
-    docker:
-    - image: docker:19.03.1-git
+    <<: *docker_job_defaults
 
     steps:
       - restore_cache:
@@ -67,36 +72,21 @@ jobs:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
 
       - setup_remote_docker:
-          version: 18.09.3
-
-      - attach_workspace:
-          at: .
+          version: 19.03.8
 
       - run:
-          name: Build Docker image
+          name: Build multiarch Docker images
           command: |
+            if [ "${CIRCLE_PROJECT_USERNAME}" != "jimmidyson" ]; then
+              echo "Skipping - this is not in origin repository"
+              exit 0
+            fi
+            DOCKER_TAG=${CIRCLE_TAG:-latest}
             apk add -U make bash
-            for arch in amd64 arm arm64 ppc64le s390x; do
-              make docker GOOS=linux GOARCH=${arch} DOCKER_IMAGE_TAG=${CIRCLE_SHA1}
-            done
-
-      - run:
-          name: Export Docker image
-          command: |
-            for arch in amd64 arm arm64 ppc64le s390x; do
-              docker save -o ./configmap-reload-docker-${arch}.tar jimmidyson/configmap-reload:${CIRCLE_SHA1}-${arch}
-            done
-
-      - persist_to_workspace:
-          root: .
-          paths:
-          - configmap-reload-docker-*.tar
+            make docker-build
 
   push_docker:
-    <<: *job_defaults
-
-    docker:
-    - image: docker:19.03.1-git
+    <<: *docker_job_defaults
 
     steps:
       - restore_cache:
@@ -104,13 +94,10 @@ jobs:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
 
       - setup_remote_docker:
-          version: 18.09.3
-
-      - attach_workspace:
-          at: .
+          version: 19.03.8
 
       - run:
-          name: Push individual arch Docker images
+          name: Push multiarch Docker images
           command: |
             if [ "${CIRCLE_PROJECT_USERNAME}" != "jimmidyson" ]; then
               echo "Skipping - this is not in origin repository"
@@ -122,17 +109,8 @@ jobs:
             fi
             DOCKER_TAG=${CIRCLE_TAG:-latest}
             docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASSWORD}
-            for arch in amd64 arm arm64 ppc64le s390x; do
-              docker load -q -i ./configmap-reload-docker-${arch}.tar
-              docker tag jimmidyson/configmap-reload:${CIRCLE_SHA1}-${arch} jimmidyson/configmap-reload:${DOCKER_TAG}-${arch}
-              docker push jimmidyson/configmap-reload:${DOCKER_TAG}-${arch}
-            done
-
-      - run:
-          name: Push multiarch Docker image
-          command: |
-            apk add -U make bash curl
-            make manifest-push DOCKER_IMAGE_TAG=${CIRCLE_TAG:-latest}
+            apk add -U make bash
+            make docker-push
 
 workflows:
   version: 2
@@ -143,7 +121,7 @@ workflows:
           tags:
             only:
               /v[0-9]+(\.[0-9]+)*/
-    - build:
+    - build_docker_buildx:
         requires:
         - checkout_code
         filters:
@@ -152,14 +130,14 @@ workflows:
               /v[0-9]+(\.[0-9]+)*/
     - build_docker:
         requires:
-        - build
+        - build_docker_buildx
         filters:
           tags:
             only:
               /v[0-9]+(\.[0-9]+)*/
     - push_docker:
         requires:
-        - build_docker
+        - build_docker_buildx
         filters:
           branches:
             only: master

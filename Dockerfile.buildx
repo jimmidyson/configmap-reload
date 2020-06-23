@@ -1,0 +1,7 @@
+FROM docker:stable-git
+
+RUN apk add -U make curl go
+RUN mkdir -vp ~/.docker/cli-plugins/
+RUN curl -fsSL --output ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.4.1/buildx-v0.4.1.linux-amd64
+RUN chmod a+x ~/.docker/cli-plugins/docker-buildx
+RUN docker buildx version

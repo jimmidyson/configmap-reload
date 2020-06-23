@@ -1,9 +1,9 @@
-ARG BASEIMAGE=busybox
-FROM $BASEIMAGE
+FROM golang:1.14 as builder
+COPY . /workspace
+WORKDIR /workspace
+RUN make out/configmap-reload
 
+FROM alpine
 USER 65534
-
-ARG BINARY=configmap-reload
-COPY out/$BINARY /configmap-reload
-
+COPY --from=builder /workspace/out/configmap-reload /configmap-reload
 ENTRYPOINT ["/configmap-reload"]
