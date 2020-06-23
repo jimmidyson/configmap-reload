@@ -132,6 +132,7 @@ jobs:
           name: Push multiarch Docker image
           command: |
             apk add -U make bash curl
+            apk upgrade
             make manifest-push DOCKER_IMAGE_TAG=${CIRCLE_TAG:-latest}
 
 workflows:
