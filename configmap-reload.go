@@ -116,7 +116,7 @@ func main() {
 						}
 					}
 					for retries := *webhookRetries; retries != 0; retries-- {
-						log.Printf("performing webhook request (%d/%d)", retries, *webhookRetries+1)
+						log.Printf("performing webhook request (%d/%d)", retries, *webhookRetries)
 						resp, err := http.DefaultClient.Do(req)
 						if err != nil {
 							setFailureMetrics(h.String(), "client_request_do")
