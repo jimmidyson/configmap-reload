@@ -134,7 +134,7 @@ func main() {
 						}
 						setSuccessMetrict(h.String(), begun)
 						log.Println("successfully triggered reload")
-						return
+						break
 					}
 				}
 			case err := <-watcher.Errors:
