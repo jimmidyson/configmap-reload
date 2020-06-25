@@ -2,7 +2,7 @@
 
 set -x
 
-BASEIMAGE="oraclelinux:7.8@sha256:3b8917d800082c4823c4011c3fc4b098e1d50537838e863718516f401621cb93"
+BASEIMAGE="oraclelinux:7.8"
 
 if [ -z "${DOCKER_IMAGE_NAME}" ] ; then
     echo "Environment variable DOCKER_IAMGE_NAME not set"
