@@ -15,4 +15,7 @@ fi
 
 make out/configmap-reload-linux-amd64
 
-docker build --build-arg BASEIMAGE="${BASEIMAGE}" -t "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}" .
+docker build \
+    --build-arg BASEIMAGE="${BASEIMAGE}" \
+    --build-arg BINARY="configmap-reload-linux-amd64" \
+    -t "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}" .
