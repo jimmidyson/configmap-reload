@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -x
+
+BASEIMAGE="oraclelinux:7.8"
+
+if [ -z "${DOCKER_IMAGE_NAME}" ] ; then
+    echo "Environment variable DOCKER_IAMGE_NAME not set"
+    exit 1
+fi
+if [ -z "${DOCKER_IMAGE_TAG}" ] ; then
+    echo "Environment variable DOCKER_IAMGE_TAG not set"
+    exit 1
+fi
+
+make out/configmap-reload-linux-amd64
+
+docker build \
+    --build-arg BASEIMAGE="${BASEIMAGE}" \
+    --build-arg BINARY="configmap-reload-linux-amd64" \
+    -t "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}" .
