@@ -5,11 +5,11 @@ set -x
 BASEIMAGE="oraclelinux:7.8"
 
 if [ -z "${DOCKER_IMAGE_NAME}" ] ; then
-    echo "Environment variable DOCKER_IAMGE_NAME not set"
+    echo "Environment variable DOCKER_IMAGE_NAME not set"
     exit 1
 fi
 if [ -z "${DOCKER_IMAGE_TAG}" ] ; then
-    echo "Environment variable DOCKER_IAMGE_TAG not set"
+    echo "Environment variable DOCKER_IMAGE_TAG not set"
     exit 1
 fi
 
