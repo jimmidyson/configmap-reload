@@ -18,8 +18,8 @@ SHELL := /bin/bash -euo pipefail
 export GO111MODULE := on
 export CGO_ENABLED := 0
 
-GOOS ?= $(shell go env GOOS)
-GOARCH ?= $(shell go env GOARCH)
+GOOS ?= $(go env GOOS)
+GOARCH ?= $(go env GOARCH)
 ORG := github.com/jimmidyson
 REPOPATH ?= $(ORG)/configmap-reload
 DOCKER_IMAGE_NAME ?= jimmidyson/configmap-reload
@@ -27,7 +27,7 @@ DOCKER_IMAGE_TAG ?= latest
 
 LDFLAGS := -s -w -extldflags '-static'
 
-SRCFILES := $(shell find . ! -path './out/*' ! -path './.git/*' -type f)
+SRCFILES := $(find . ! -path './out/*' ! -path './.git/*' -type f)
 
 ALL_ARCH=amd64 arm arm64 ppc64le s390x
 ML_PLATFORMS=$(addprefix linux/,$(ALL_ARCH))
