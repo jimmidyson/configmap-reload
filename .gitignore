@@ -3,3 +3,4 @@ _gopath/
 vendor/
 .vendor
 manifest-tool
+.idea/

@@ -1,4 +1,7 @@
 # Build Instructions
+
+Based on branch `v0.3.0`
+
 ---
 ## Build
 
