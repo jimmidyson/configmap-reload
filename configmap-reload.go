@@ -115,6 +115,9 @@ func main() {
 							req.SetBasicAuth(userInfo.Username(), password)
 						}
 					}
+
+					successfulReloadWebhook := false
+
 					for retries := *webhookRetries; retries != 0; retries-- {
 						log.Printf("performing webhook request (%d/%d)", retries, *webhookRetries)
 						resp, err := http.DefaultClient.Do(req)
@@ -132,9 +135,16 @@ func main() {
 							time.Sleep(time.Second * 10)
 							continue
 						}
+
 						setSuccessMetrict(h.String(), begun)
 						log.Println("successfully triggered reload")
+						successfulReloadWebhook = true
 						break
+					}
+
+					if !successfulReloadWebhook {
+						setFailureMetrics(h.String(), "retries_exhausted")
+						log.Println("error:", "Webhook reload retries exhausted")
 					}
 				}
 			case err := <-watcher.Errors:
