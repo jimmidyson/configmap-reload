@@ -1,14 +1,14 @@
+version: 2.1
+
 job_defaults: &job_defaults
   working_directory: /go/src/github.com/jimmidyson/configmap-reload
 
   docker:
-  - image: golang:1.14-alpine
+  - image: golang:1.14
 
   environment: &env_defaults
   - CGO_ENABLED: "0"
   - GO111MODULE: "on"
-
-version: 2
 
 jobs:
   checkout_code:
@@ -38,7 +38,6 @@ jobs:
           name: Build binary
 
           command: |
-            apk add -U make bash
             make cross out/configmap-reload
 
       - persist_to_workspace:
@@ -59,7 +58,7 @@ jobs:
     <<: *job_defaults
 
     docker:
-    - image: docker:19.03.1-git
+    - image: docker:19.03.8-git
 
     steps:
       - restore_cache:
@@ -67,7 +66,7 @@ jobs:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
 
       - setup_remote_docker:
-          version: 18.09.3
+          version: 19.03.8
 
       - attach_workspace:
           at: .
@@ -104,7 +103,7 @@ jobs:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
 
       - setup_remote_docker:
-          version: 18.09.3
+          version: 19.03.8
 
       - attach_workspace:
           at: .
