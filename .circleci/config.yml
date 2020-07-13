@@ -10,6 +10,12 @@ job_defaults: &job_defaults
   - CGO_ENABLED: "0"
   - GO111MODULE: "on"
 
+docker_job_defaults: &docker_job_defaults
+  <<: *job_defaults
+
+  docker:
+  - image: docker:19.03.8-git
+
 jobs:
   checkout_code:
     <<: *job_defaults
@@ -55,10 +61,7 @@ jobs:
           - /go/pkg/mod
 
   build_docker:
-    <<: *job_defaults
-
-    docker:
-    - image: docker:19.03.8-git
+    <<: *docker_job_defaults
 
     steps:
       - restore_cache:
@@ -92,10 +95,7 @@ jobs:
           - configmap-reload-docker-*.tar
 
   push_docker:
-    <<: *job_defaults
-
-    docker:
-    - image: docker:19.03.1-git
+    <<: *docker_job_defaults
 
     steps:
       - restore_cache:
