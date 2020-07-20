@@ -5,7 +5,7 @@
 
 set -x
 
-BASEIMAGE="container-registry.oracle.com/os/oraclelinux:7.8"
+BASEIMAGE="container-registry.oracle.com/os/oraclelinux:7.8@sha256:46fc083cf0250ed5260fa6fe822d7d4c139ca1f7fc38e4a17ba662464bd1df4a"
 
 if [ -z "${DOCKER_IMAGE_NAME}" ] ; then
     echo "Environment variable DOCKER_IMAGE_NAME not set"
