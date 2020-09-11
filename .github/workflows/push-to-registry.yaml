@@ -1,8 +1,6 @@
 name: Push container to registry
 on: 
   push:
-    branches:
-      - master
     tags:
       - "*"
 
@@ -27,9 +25,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        name: Push container to Docker
+        name: Extract tag name
+        shell: bash
+        run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/tags/})"
+        id: extract_tag
+      -
+        name: Build container and push to Docker
         run: make push
         env:
           GOOS: linux
           DOCKER_IMAGE_NAME: werkspot/configmap-reload
-          DOCKER_IMAGE_TAG: ${{ github.ref }}
+          DOCKER_IMAGE_TAG: ${{ steps.extract_tag.outputs.tag }}
