@@ -136,7 +136,7 @@ func main() {
 							continue
 						}
 
-						setSuccessMetrict(h.String(), begun)
+						setSuccessMetrics(h.String(), begun)
 						log.Println("successfully triggered reload")
 						successfulReloadWebhook = true
 						break
@@ -170,7 +170,7 @@ func setFailureMetrics(h, reason string) {
 	lastReloadError.WithLabelValues(h).Set(1.0)
 }
 
-func setSuccessMetrict(h string, begun time.Time) {
+func setSuccessMetrics(h string, begun time.Time) {
 	requestDuration.WithLabelValues(h).Set(time.Since(begun).Seconds())
 	successReloads.WithLabelValues(h).Inc()
 	lastReloadError.WithLabelValues(h).Set(0.0)
