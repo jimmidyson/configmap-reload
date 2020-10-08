@@ -17,16 +17,22 @@ It is available as a Docker image at https://hub.docker.com/r/jimmidyson/configm
 
 ```
 Usage of ./out/configmap-reload:
+  -signalHook value
+        the signal params to send a signal to target process when the specified config map volume directory has been updated, format:signalNumber:processName, eg: send nginx process with SIGHUP: 1:nginx 
   -volume-dir value
         the config map volume directory to watch for updates; may be used multiple times
+  -web.listen-address string
+        Address to listen on for web interface and telemetry. (default ":9533")
+  -web.telemetry-path string
+        Path under which to expose metrics. (default "/metrics")
   -webhook-method string
         the HTTP method url to use to send the webhook (default "POST")
+  -webhook-retries int
+        the amount of times to retry the webhook reload request (default 1)
   -webhook-status-code int
         the HTTP status code indicating successful triggering of reload (default 200)
-  -webhook-url string
+  -webhook-url value
         the url to send a request to when the specified config map volume directory has been updated
-  -webhook-retries integer
-        the amount of times to retry the webhook reload request
 ```
 
 ### License
