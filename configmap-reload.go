@@ -23,9 +23,10 @@ var (
 	webhook           webhookFlag
 	webhookMethod     = flag.String("webhook-method", "POST", "the HTTP method url to use to send the webhook")
 	webhookStatusCode = flag.Int("webhook-status-code", 200, "the HTTP status code indicating successful triggering of reload")
-	webhookRetries    = flag.Int("webhook-retries", 1, "the amount of times to retry the webhook reload request")
+	webhookRetries    = flag.Int("webhook-retries", 3, "the amount of times to retry the webhook reload request")
 	listenAddress     = flag.String("web.listen-address", ":9533", "Address to listen on for web interface and telemetry.")
 	metricPath        = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
+	onlyCM            = flag.Bool("only-configmap-files", false, "Watch only configmap files")
 
 	lastReloadError = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: namespace,
@@ -100,7 +101,7 @@ func main() {
 				if !isValidEvent(event) {
 					continue
 				}
-				log.Println("config map updated")
+				log.Printf("Detected an event: %s", event.Name)
 				for _, h := range webhook {
 					begun := time.Now()
 					req, err := http.NewRequest(*webhookMethod, h.String(), nil)
@@ -119,7 +120,7 @@ func main() {
 					successfulReloadWebhook := false
 
 					for retries := *webhookRetries; retries != 0; retries-- {
-						log.Printf("performing webhook request (%d/%d)", retries, *webhookRetries)
+						log.Printf("Performing webhook request %s (%d/%d)", h.String(), retries, *webhookRetries)
 						resp, err := http.DefaultClient.Do(req)
 						if err != nil {
 							setFailureMetrics(h.String(), "client_request_do")
@@ -177,10 +178,7 @@ func setSuccessMetrics(h string, begun time.Time) {
 }
 
 func isValidEvent(event fsnotify.Event) bool {
-	if event.Op&fsnotify.Create != fsnotify.Create {
-		return false
-	}
-	if filepath.Base(event.Name) != "..data" {
+	if *onlyCM && filepath.Base(event.Name) != "..data" {
 		return false
 	}
 	return true
