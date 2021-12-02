@@ -5,7 +5,8 @@ FROM ghcr.io/oracle/oraclelinux:7-slim
 
 RUN yum update -y \
     && yum clean all \
-    && rm -rf /var/cache/yum
+    && rm -rf /var/cache/yum \
+    && yum install -y nss-3.67.0-4.el7_9.x86_64 nss-tools-3.67.0-4.el7_9.x86_64 nss-sysinit-3.67.0-4.el7_9.x86_64
 
 USER 65534
 
