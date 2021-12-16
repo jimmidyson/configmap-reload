@@ -4,7 +4,7 @@ job_defaults: &job_defaults
   working_directory: /go/src/github.com/jimmidyson/configmap-reload
 
   docker:
-  - image: golang:1.15
+  - image: golang:1.17
 
   environment: &env_defaults
   - CGO_ENABLED: "0"
@@ -14,7 +14,7 @@ docker_job_defaults: &docker_job_defaults
   <<: *job_defaults
 
   docker:
-  - image: docker:19.03.13-git
+  - image: docker:20.10.12-git
 
 jobs:
   checkout_code:
@@ -69,7 +69,7 @@ jobs:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
 
       - setup_remote_docker:
-          version: 19.03.13
+          version: 20.10.11
 
       - attach_workspace:
           at: .
@@ -103,7 +103,7 @@ jobs:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
 
       - setup_remote_docker:
-          version: 19.03.13
+          version: 20.10.11
 
       - attach_workspace:
           at: .
