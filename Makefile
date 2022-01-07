@@ -36,11 +36,11 @@ ALL_BINARIES ?= $(addprefix out/configmap-reload-, \
 									darwin-amd64 \
 									windows-amd64.exe)
 
-DEFAULT_BASEIMAGE_amd64   := amd64/busybox:1.33.0
-DEFAULT_BASEIMAGE_arm     := arm32v7/busybox:1.33.0
-DEFAULT_BASEIMAGE_arm64   := arm64v8/busybox:1.33.0
-DEFAULT_BASEIMAGE_ppc64le := ppc64le/busybox:1.33.0
-DEFAULT_BASEIMAGE_s390x   := s390x/busybox:1.33.0
+DEFAULT_BASEIMAGE_amd64   := amd64/busybox:1.34.0
+DEFAULT_BASEIMAGE_arm     := arm32v7/busybox:1.34.0
+DEFAULT_BASEIMAGE_arm64   := arm64v8/busybox:1.34.0
+DEFAULT_BASEIMAGE_ppc64le := ppc64le/busybox:1.34.0
+DEFAULT_BASEIMAGE_s390x   := s390x/busybox:1.34.0
 
 BASEIMAGE ?= $(DEFAULT_BASEIMAGE_$(GOARCH))
 
