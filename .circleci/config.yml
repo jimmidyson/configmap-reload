@@ -162,7 +162,7 @@ workflows:
         - build_docker
         filters:
           branches:
-            only: master
+            only: main
           tags:
             only:
               /v[0-9]+(\.[0-9]+)*/
