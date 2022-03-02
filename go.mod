@@ -1,6 +1,9 @@
+// Copyright (c) 2022, Oracle and/or its affiliates.
+// Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+
 module github.com/jimmidyson/configmap-reload
 
-go 1.17
+go 1.16
 
 require (
 	github.com/fsnotify/fsnotify v1.5.1
