@@ -8,13 +8,14 @@ job_defaults: &job_defaults
 
   environment: &env_defaults
   - CGO_ENABLED: "0"
-  - GO111MODULE: "on"
+
+docker_version: &docker_version 20.10.17
 
 docker_job_defaults: &docker_job_defaults
   <<: *job_defaults
 
   docker:
-  - image: docker:20.10.12-git
+  - image: docker:20.10.17-git
 
 jobs:
   checkout_code:
@@ -69,7 +70,7 @@ jobs:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
 
       - setup_remote_docker:
-          version: 20.10.11
+          version: *docker_version
 
       - attach_workspace:
           at: .
@@ -103,7 +104,7 @@ jobs:
           - code-repo-{{ .Environment.CIRCLE_SHA1 }}-{{ .Environment.CIRCLE_TAG }}
 
       - setup_remote_docker:
-          version: 20.10.11
+          version: *docker_version
 
       - attach_workspace:
           at: .
