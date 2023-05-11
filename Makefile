@@ -20,7 +20,7 @@ export CGO_ENABLED := 0
 
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
-ORG := github.com/jimmidyson
+ORG := github.com/ashokks80
 REPOPATH ?= $(ORG)/configmap-reload
 DOCKER_IMAGE_NAME ?= jimmidyson/configmap-reload
 DOCKER_IMAGE_TAG ?= latest
