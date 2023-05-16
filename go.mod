@@ -1,6 +1,6 @@
-module github.com/ashokks80/configmap-reload
+module github.com/jimmidyson/configmap-reload
 
-go 1.20
+go 1.20.3
 
 require (
 	github.com/fsnotify/fsnotify v1.5.4
