@@ -4,7 +4,7 @@ job_defaults: &job_defaults
   working_directory: /go/src/github.com/jimmidyson/configmap-reload
 
   docker:
-  - image: golang:1.19
+  - image: golang:1.20
 
   environment: &env_defaults
   - CGO_ENABLED: "0"
