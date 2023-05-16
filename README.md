@@ -3,15 +3,15 @@
 [![license](https://img.shields.io/github/license/jimmidyson/configmap-reload.svg?maxAge=2592000)](https://github.com/jimmidyson/configmap-reload)
 [![Docker Stars](https://img.shields.io/docker/stars/jimmidyson/configmap-reload.svg?maxAge=2592000)](https://hub.docker.com/r/jimmidyson/configmap-reload/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/jimmidyson/configmap-reload.svg?maxAge=2592000)](https://hub.docker.com/r/jimmidyson/configmap-reload/)
-[![Dependency Status](https://dependencyci.com/github/jimmidyson/configmap-reload/badge)](https://dependencyci.com/github/jimmidyson/configmap-reload)
-[![CircleCI](https://img.shields.io/circleci/project/jimmidyson/configmap-reload.svg?maxAge=2592000)](https://circleci.com/gh/jimmidyson/configmap-reload)
 
-**configmap-reload** is a simple binary to trigger a reload when Kubernetes ConfigMaps are updated.
+**configmap-reload** is a simple binary to trigger a reload when Kubernetes ConfigMaps or Secrets, mounted into pods,
+are updated.
 It watches mounted volume dirs and notifies the target process that the config map has been changed.
 It currently only supports sending an HTTP request, but in future it is expected to support sending OS
 (e.g. SIGHUP) once Kubernetes supports pod PID namespaces.
 
-It is available as a Docker image at https://hub.docker.com/r/jimmidyson/configmap-reload
+Since version v0.10, the Docker image is available from ghcr.io at <https://github.com/jimmidyson/configmap-reload/pkgs/container/configmap-reload>.
+Previous versons are available from Docker Hub at <https://hub.docker.com/r/jimmidyson/configmap-reload>
 
 ### Usage
 
