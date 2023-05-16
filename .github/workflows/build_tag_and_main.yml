@@ -1,0 +1,30 @@
+name: build-and-push-tag-and-main
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+jobs:
+  build-and-push:
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and push image
+      run: |
+        docker buildx build \
+          --platform linux/arm64/v8,linux/amd64,linux/arm/v5,linux/arm/v6,linux/arm/v7,linux/ppc64le,linux/s390x \
+          --build-arg GO_VERSION=$(grep -m 1 go go.mod | cut -d\  -f2) \
+          -t ghcr.io/jimmidyson/configmap-reload:${{ github.ref_name == 'main' && 'dev' || github.ref_name }} \
+          --push \
+          .
