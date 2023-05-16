@@ -22,7 +22,7 @@ GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
 ORG := github.com/jimmidyson
 REPOPATH ?= $(ORG)/configmap-reload
-DOCKER_IMAGE_NAME ?= jimmidyson/configmap-reload
+DOCKER_IMAGE_NAME ?= ghcr.io/jimmidyson/configmap-reload
 DOCKER_IMAGE_TAG ?= latest
 
 LDFLAGS := -s -w -extldflags '-static'
@@ -35,12 +35,6 @@ ALL_BINARIES ?= $(addprefix out/configmap-reload-, \
 									$(addprefix linux-,$(ALL_ARCH)) \
 									darwin-amd64 \
 									windows-amd64.exe)
-
-DEFAULT_BASEIMAGE_amd64   := amd64/busybox:stable
-DEFAULT_BASEIMAGE_arm     := arm32v7/busybox:stable
-DEFAULT_BASEIMAGE_arm64   := arm64v8/busybox:stable
-DEFAULT_BASEIMAGE_ppc64le := ppc64le/busybox:stable
-DEFAULT_BASEIMAGE_s390x   := s390x/busybox:stable
 
 BASEIMAGE ?= $(DEFAULT_BASEIMAGE_$(GOARCH))
 
@@ -68,26 +62,3 @@ checksum:
 .PHONY: clean
 clean:
 	rm -rf out
-
-.PHONY: docker
-docker: out/configmap-reload-$(GOOS)-$(GOARCH) Dockerfile
-	docker build --build-arg BASEIMAGE=$(BASEIMAGE) --build-arg BINARY=$(BINARY) -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$(GOARCH) .
-
-manifest-tool:
-	curl -fsSL https://github.com/estesp/manifest-tool/releases/download/v1.0.0-rc3/manifest-tool-linux-amd64 > ./manifest-tool
-	chmod +x ./manifest-tool
-
-.PHONY: push-%
-push-%:
-	$(MAKE) GOARCH=$* docker
-	docker push $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$*
-
-.PHONY: push
-push: manifest-tool $(addprefix push-,$(ALL_ARCH)) manifest-push
-
-comma:= ,
-empty:=
-space:= $(empty) $(empty)
-.PHONY: manifest-push
-manifest-push: manifest-tool
-	./manifest-tool push from-args --platforms $(subst $(space),$(comma),$(ML_PLATFORMS)) --template $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-ARCH --target $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
