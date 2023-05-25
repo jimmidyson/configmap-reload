@@ -36,8 +36,6 @@ ALL_BINARIES ?= $(addprefix out/configmap-reload-, \
 									darwin-amd64 \
 									windows-amd64.exe)
 
-BASEIMAGE ?= $(DEFAULT_BASEIMAGE_$(GOARCH))
-
 BINARY=configmap-reload-linux-$(GOARCH)
 
 out/configmap-reload: out/configmap-reload-$(GOOS)-$(GOARCH)
