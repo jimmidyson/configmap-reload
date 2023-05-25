@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG BASEIMAGE=busybox
+ARG BASEIMAGE=gcr.io/distroless/static-debian11:nonroot
 
 ARG GO_VERSION
 FROM --platform=${BUILDOS}/${BUILDARCH} golang:${GO_VERSION} as builder
