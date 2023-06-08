@@ -3,17 +3,14 @@
 ARG BASEIMAGE=gcr.io/distroless/static-debian11:nonroot
 
 ARG GO_VERSION
-FROM --platform=${BUILDOS}/${BUILDARCH} golang:${GO_VERSION} as builder
-
-ENV GOOS ${TARGETOS}
-ENV GOARCH ${TARGETARCH}
-ENV CGO_ENABLED 0
+FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION} as builder
 
 COPY . /src
 WORKDIR /src
-RUN go build --installsuffix cgo -ldflags="-s -w -extldflags '-static'" -a -o /configmap-reload configmap-reload.go
+ARG TARGETARCH
+RUN CGO_ENABLED=0 GOARCH=${TARGETARCH} go build --installsuffix cgo -ldflags="-s -w -extldflags '-static'" -a -o /configmap-reload configmap-reload.go
 
-FROM ${BASEIMAGE}
+FROM --platform=${TARGETPLATFORM} ${BASEIMAGE}
 
 LABEL org.opencontainers.image.source="https://github.com/jimmidyson/configmap-reload"
 
