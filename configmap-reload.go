@@ -97,8 +97,15 @@ func main() {
 		for {
 			select {
 			case event := <-watcher.Events:
-				if !isValidEvent(event) {
-					continue
+				if event.Op&fsnotify.Create == fsnotify.Create {
+					info, err := os.Stat(event.Name)
+					if err == nil && info.IsDir() {
+						// New directory created, add it to the watcher
+						err = watcher.Add(event.Name)
+						if err != nil {
+							log.Println("Error adding directory:", err)
+						}
+					}
 				}
 				log.Println("config map updated")
 				for _, h := range webhook {
@@ -154,9 +161,32 @@ func main() {
 		}
 	}()
 
+	watchTree := func(path string) error {
+		err := watcher.Add(path)
+		if err != nil {
+			return err
+		}
+
+		return filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				log.Println("Error walking path:", err)
+				return nil
+			}
+
+			if info.IsDir() {
+				err = watcher.Add(path)
+				if err != nil {
+					log.Println("Error adding directory:", err)
+				}
+			}
+
+			return nil
+		})
+	}
+
 	for _, d := range volumeDirs {
 		log.Printf("Watching directory: %q", d)
-		err = watcher.Add(d)
+		err = watchTree(d)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -174,16 +204,6 @@ func setSuccessMetrics(h string, begun time.Time) {
 	requestDuration.WithLabelValues(h).Set(time.Since(begun).Seconds())
 	successReloads.WithLabelValues(h).Inc()
 	lastReloadError.WithLabelValues(h).Set(0.0)
-}
-
-func isValidEvent(event fsnotify.Event) bool {
-	if event.Op&fsnotify.Create != fsnotify.Create {
-		return false
-	}
-	if filepath.Base(event.Name) != "..data" {
-		return false
-	}
-	return true
 }
 
 func serverMetrics(listenAddress, metricsPath string) error {
