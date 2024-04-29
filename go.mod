@@ -2,6 +2,8 @@ module github.com/jimmidyson/configmap-reload
 
 go 1.21
 
+toolchain go1.22.2
+
 require (
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/prometheus/client_golang v1.13.0
