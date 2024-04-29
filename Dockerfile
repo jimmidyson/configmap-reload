@@ -5,6 +5,8 @@ ARG BASEIMAGE=gcr.io/distroless/static-debian11:nonroot
 ARG GO_VERSION
 FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION} as builder
 
+ENV GOTOOLCHAIN=auto
+
 COPY . /src
 WORKDIR /src
 ARG TARGETARCH
