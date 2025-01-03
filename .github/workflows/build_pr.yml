@@ -3,23 +3,26 @@ on:
   pull_request:
     branches:
       - main
+
+permissions: read-all
+
 jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
 
-    - name: Build image
-      run: |
-        docker buildx build \
-          --platform linux/arm64/v8,linux/amd64,linux/arm,linux/ppc64le,linux/s390x \
-          --build-arg GO_VERSION=$(grep -m 1 go go.mod | cut -d\  -f2) \
-          -t ghcr.io/jimmidyson/configmap-reload:${{ github.event.pull_request.head.sha }} \
-          .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5 # v3.8.0
+
+      - name: Build image
+        run: |
+          docker buildx build \
+            --platform linux/arm64/v8,linux/amd64,linux/arm,linux/ppc64le,linux/s390x \
+            --build-arg GO_VERSION=$(grep -m 1 go go.mod | cut -d\  -f2) \
+            -t ghcr.io/jimmidyson/configmap-reload:${{ github.event.pull_request.head.sha }} \
+            .
