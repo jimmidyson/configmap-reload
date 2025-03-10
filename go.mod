@@ -6,7 +6,7 @@ toolchain go1.23.1
 
 require (
 	github.com/fsnotify/fsnotify v1.8.0
-	github.com/prometheus/client_golang v1.21.0
+	github.com/prometheus/client_golang v1.21.1
 )
 
 require (
