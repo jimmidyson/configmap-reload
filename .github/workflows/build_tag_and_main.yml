@@ -35,7 +35,6 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/arm64/v8,linux/amd64,linux/arm,linux/ppc64le,linux/s390x \
-            --build-arg GO_VERSION=$(grep -m 1 go go.mod | cut -d\  -f2) \
             -t ghcr.io/jimmidyson/configmap-reload:${{ github.ref_name == 'main' && 'dev' || github.ref_name }} \
             --push \
             .

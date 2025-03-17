@@ -2,8 +2,7 @@
 
 ARG BASEIMAGE=gcr.io/distroless/static-debian11:nonroot
 
-ARG GO_VERSION
-FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION} as builder
+FROM --platform=${BUILDPLATFORM} golang:1.24.1@sha256:af0bb3052d6700e1bc70a37bca483dc8d76994fd16ae441ad72390eea6016d03 as builder
 
 ENV GOTOOLCHAIN=auto
 
