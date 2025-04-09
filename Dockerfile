@@ -9,7 +9,7 @@ WORKDIR /src
 ARG TARGETARCH
 RUN CGO_ENABLED=0 GOARCH=${TARGETARCH} go build --installsuffix cgo -ldflags="-s -w -extldflags '-static'" -a -o /configmap-reload configmap-reload.go
 
-FROM --platform=${TARGETPLATFORM} ${BASEIMAGE}
+FROM ${BASEIMAGE}
 
 LABEL org.opencontainers.image.source="https://github.com/jimmidyson/configmap-reload"
 
