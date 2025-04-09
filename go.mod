@@ -2,7 +2,7 @@ module github.com/jimmidyson/configmap-reload
 
 go 1.21
 
-toolchain go1.23.1
+toolchain go1.24.2
 
 require (
 	github.com/fsnotify/fsnotify v1.8.0

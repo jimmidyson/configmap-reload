@@ -31,3 +31,9 @@ updates:
           - patch
     schedule:
       interval: weekly
+
+  - package-ecosystem: "docker"
+    directories:
+      - "/"
+    schedule:
+      interval: "daily"
