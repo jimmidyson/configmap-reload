@@ -1,0 +1,21 @@
+# escape=`
+# syntax=docker/dockerfile:1
+
+ARG BASEIMAGE=mcr.microsoft.com/windows/nanoserver:ltsc2022
+
+FROM golang:1.24.4-windowsservercore-ltsc2022@sha256:5878fadfc7ce48fcc0f38640ef136cfaf26ece43d60d19bf576b17d3f35140e0 AS builder
+
+COPY . C:\src
+WORKDIR C:\src
+SHELL ["powershell", "-Command"]
+RUN go build -o configmap-reload.exe configmap-reload.go
+
+FROM ${BASEIMAGE}
+
+LABEL org.opencontainers.image.source="https://github.com/jimmidyson/configmap-reload"
+
+USER ContainerUser
+
+COPY --from=builder C:\src\configmap-reload.exe C:\configmap-reload.exe
+
+ENTRYPOINT ["C:\\configmap-reload.exe"]
