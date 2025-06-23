@@ -64,9 +64,9 @@ jobs:
           docker build `
             --file Dockerfile.windows `
             --platform windows/amd64 `
-            -t ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev-windows' || github.ref_name }}-windows `
+            -t ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev' || github.ref_name }}-windows `
             .
 
       - name: Push Windows image
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev-windows' || github.ref_name }}-windows
+          docker push ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev' || github.ref_name }}-windows
