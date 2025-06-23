@@ -16,8 +16,6 @@ FROM ${BASEIMAGE}
 
 LABEL org.opencontainers.image.source="https://github.com/jimmidyson/configmap-reload"
 
-USER ContainerUser
-
 WORKDIR C:\bin
 COPY --from=builder C:\src\configmap-reload.exe C:\bin\configmap-reload.exe
 
