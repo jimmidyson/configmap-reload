@@ -29,6 +29,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
+      - name: Verify Docker Auth
+        run: docker info
+
       - name: Build and push image
         run: |
           docker buildx build \
@@ -52,6 +55,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
+
+      - name: Verify Docker Auth
+        run: docker info
 
       - name: Build Windows image
         run: |
