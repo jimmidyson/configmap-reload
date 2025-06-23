@@ -1,0 +1,66 @@
+name: test-build-and-push-tag-and-main
+on:
+  push:
+    branches:
+      - windows-support
+
+permissions: read-all
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build and push image
+        run: |
+          docker buildx build \
+            --platform linux/arm64/v8,linux/amd64,linux/arm,linux/ppc64le,linux/s390x \
+            -t ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev' || github.ref_name }} \
+            --push \
+            .
+
+  build-and-push-windows:
+    runs-on: windows-2022
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build Windows image
+        run: |
+          docker build `
+            --file Dockerfile.windows `
+            --platform windows/amd64 `
+            -t ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev-windows' || github.ref_name }}-windows `
+            .
+
+      - name: Push Windows image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev-windows' || github.ref_name }}-windows
