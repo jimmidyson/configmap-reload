@@ -10,15 +10,15 @@ WORKDIR C:\src
 SHELL ["powershell", "-Command"]
 RUN go build -o configmap-reload.exe configmap-reload.go
 
-RUN dir C:\src
-
 FROM ${BASEIMAGE}
 
 LABEL org.opencontainers.image.source="https://github.com/jimmidyson/configmap-reload"
 
-WORKDIR C:\bin
-COPY --from=builder C:\src\configmap-reload.exe C:\bin\configmap-reload.exe
+USER ContainerUser
 
-RUN dir C:\bin
+WORKDIR C:\configmap-reload
+COPY --from=builder C:\src\configmap-reload.exe C:\configmap-reload\configmap-reload.exe
 
-ENTRYPOINT ["C:\\bin\\configmap-reload.exe"]
+RUN setx /M PATH "%PATH%;C:\configmap-reload"
+
+ENTRYPOINT ["configmap-reload.exe"]
