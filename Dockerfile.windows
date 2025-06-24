@@ -19,7 +19,6 @@ COPY --from=builder C:\src\configmap-reload.exe C:\configmap-reload\configmap-re
 
 USER ContainerAdministrator
 
-SHELL ["powershell", "-Command"]
 RUN setx /M PATH "%PATH%;C:\configmap-reload"
 
 USER ContainerUser
