@@ -14,11 +14,14 @@ FROM ${BASEIMAGE}
 
 LABEL org.opencontainers.image.source="https://github.com/jimmidyson/configmap-reload"
 
-USER ContainerUser
-
 WORKDIR C:\configmap-reload
 COPY --from=builder C:\src\configmap-reload.exe C:\configmap-reload\configmap-reload.exe
 
+USER ContainerAdministrator
+
+SHELL ["powershell", "-Command"]
 RUN setx /M PATH "%PATH%;C:\configmap-reload"
+
+USER ContainerUser
 
 ENTRYPOINT ["configmap-reload.exe"]
