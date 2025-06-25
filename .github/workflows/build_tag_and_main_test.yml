@@ -67,6 +67,10 @@ jobs:
             -t ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev' || github.ref_name }}-windows `
             .
 
+      - name: Smoke test Windows image
+        run: |
+          docker run --rm ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev' || github.ref_name }}-windows
+
       - name: Push Windows image
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev' || github.ref_name }}-windows
