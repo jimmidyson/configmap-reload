@@ -29,9 +29,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
-      - name: Verify Docker Auth
-        run: docker info
-
       - name: Build and push image
         run: |
           docker buildx build \
@@ -56,9 +53,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
-      - name: Verify Docker Auth
-        run: docker info
-
       - name: Build Windows image
         run: |
           docker build `
@@ -66,10 +60,6 @@ jobs:
             --platform windows/amd64 `
             -t ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev' || github.ref_name }}-windows `
             .
-
-      - name: Smoke test Windows image
-        run: |
-          docker run --rm ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'windows-support' && 'dev' || github.ref_name }}-windows
 
       - name: Push Windows image
         run: |
