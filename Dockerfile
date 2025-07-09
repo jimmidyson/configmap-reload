@@ -2,7 +2,7 @@
 
 ARG BASEIMAGE=gcr.io/distroless/static-debian11:nonroot
 
-FROM --platform=${BUILDPLATFORM} golang:1.24.4@sha256:3178db8b0d0fbcb11cf8271f7fb75b5f1f76367e306968c7c725999cb30c9982 AS builder
+FROM --platform=${BUILDPLATFORM} golang:1.24.5@sha256:a9219eb99cd2951b042985dbec09d508b3ddc20c4da52a3a55b275b3779e4a05 AS builder
 
 COPY . /src
 WORKDIR /src
