@@ -25,3 +25,17 @@ jobs:
             --platform linux/arm64/v8,linux/amd64,linux/arm,linux/ppc64le,linux/s390x \
             -t ghcr.io/jimmidyson/configmap-reload:${{ github.event.pull_request.head.sha }} \
             .
+
+  build-windows:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Build Windows image
+        run: |
+          docker build `
+            --file Dockerfile.windows `
+            --platform windows/amd64 `
+            -t ghcr.io/jimmidyson/configmap-reload:${{ github.event.pull_request.head.sha }}-windows `
+            .
