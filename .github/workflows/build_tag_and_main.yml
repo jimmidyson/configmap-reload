@@ -2,9 +2,9 @@ name: build-and-push-tag-and-main
 on:
   push:
     branches:
-      - main
+    - main
     tags:
-      - v*
+    - v*
 
 permissions: read-all
 
@@ -15,34 +15,34 @@ jobs:
       contents: write
       packages: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+    - name: Checkout code
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
 
-      - name: Build and push image
-        run: |
-          docker buildx build \
-            --platform linux/arm64/v8,linux/amd64,linux/arm,linux/ppc64le,linux/s390x \
-            -t ghcr.io/jimmidyson/configmap-reload:${{ github.ref_name == 'main' && 'dev' || github.ref_name }} \
-            --push \
-            .
+    - name: Build and push image
+      run: |
+        docker buildx build \
+          --platform linux/arm64/v8,linux/amd64,linux/arm,linux/ppc64le,linux/s390x \
+          -t ghcr.io/${{ github.repository_owner }}/configmap-reload:${{ github.ref_name == 'main' && 'dev' || github.ref_name }} \
+          --push \
+          .
 
-      - name: Create release
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          token: ${{ github.token }}
-          make_latest: true
-          generate_release_notes: true
+    - name: Create release
+      uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        token: ${{ github.token }}
+        make_latest: true
+        generate_release_notes: true
