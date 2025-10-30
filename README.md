@@ -10,8 +10,7 @@ or pod. Therefore, the supplied user account needs to have permission to issue t
 The script is supposed to run in a sidecar container to be able to access the pod's filesystem and
 network.
 
-
-Te Docker image is available from ghcr.io at <https://github.com/ninech/kvs-tls-reloader/pkgs/container/configmap-reload>.
+The Docker image is available from ghcr.io at <https://github.com/ninech/kvs-tls-reloader/pkgs/container/kvs-tls-reloader>.
 
 ### Usage
 
