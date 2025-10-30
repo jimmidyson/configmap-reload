@@ -23,5 +23,5 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/arm64/v8,linux/amd64,linux/arm,linux/ppc64le,linux/s390x \
-            -t ghcr.io/jimmidyson/configmap-reload:${{ github.event.pull_request.head.sha }} \
+            -t ghcr.io/ninech/kvs-tls-reloader:${{ github.event.pull_request.head.sha }} \
             .
