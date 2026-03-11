@@ -1,8 +1,8 @@
 # Kubernetes ConfigMap Reload
 
-[![license](https://img.shields.io/github/license/fitsegreat/configmap-reload.svg?maxAge=2592000)](https://github.com/fitsegreat/configmap-reload)
-[![Docker Stars](https://img.shields.io/docker/stars/fitsegreat/configmap-reload.svg?maxAge=2592000)](https://ghcr.io/v2/fitsegreat/configmap-reload/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/fitsegreat/configmap-reload.svg?maxAge=2592000)](https://ghcr.io/v2/fitsegreat/configmap-reload/)
+[![license](https://img.shields.io/github/license/jimmidyson/configmap-reload.svg?maxAge=2592000)](https://github.com/jimmidyson/configmap-reload)
+[![Docker Stars](https://img.shields.io/docker/stars/jimmidyson/configmap-reload.svg?maxAge=2592000)](https://hub.docker.com/r/jimmidyson/configmap-reload/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/jimmidyson/configmap-reload.svg?maxAge=2592000)](https://hub.docker.com/r/jimmidyson/configmap-reload/)
 
 **configmap-reload** is a simple binary to trigger a reload when Kubernetes ConfigMaps or Secrets, mounted into pods,
 are updated.
