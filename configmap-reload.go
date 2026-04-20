@@ -177,7 +177,7 @@ func setSuccessMetrics(h string, begun time.Time) {
 }
 
 func isValidEvent(event fsnotify.Event) bool {
-	if event.Op&fsnotify.Create != fsnotify.Create {
+	if event.Op&fsnotify.Create != fsnotify.Create && event.Op&fsnotify.Write != fsnotify.Write {
 		return false
 	}
 	if filepath.Base(event.Name) != "..data" {
