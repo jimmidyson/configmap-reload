@@ -105,7 +105,7 @@ func main() {
 					begun := time.Now()
 					req, err := http.NewRequest(*webhookMethod, h.String(), nil)
 					if err != nil {
-						setFailureMetrics(h.String(), "client_request_create")
+						setFailureMetrics(h.Redacted(), "client_request_create")
 						log.Println("error:", err)
 						continue
 					}
@@ -122,28 +122,28 @@ func main() {
 						log.Printf("performing webhook request (%d/%d)", retries, *webhookRetries)
 						resp, err := http.DefaultClient.Do(req)
 						if err != nil {
-							setFailureMetrics(h.String(), "client_request_do")
+							setFailureMetrics(h.Redacted(), "client_request_do")
 							log.Println("error:", err)
 							time.Sleep(time.Second * 10)
 							continue
 						}
 						resp.Body.Close()
-						requestsByStatusCode.WithLabelValues(h.String(), strconv.Itoa(resp.StatusCode)).Inc()
+						requestsByStatusCode.WithLabelValues(h.Redacted(), strconv.Itoa(resp.StatusCode)).Inc()
 						if resp.StatusCode != *webhookStatusCode {
-							setFailureMetrics(h.String(), "client_response")
+							setFailureMetrics(h.Redacted(), "client_response")
 							log.Println("error:", "Received response code", resp.StatusCode, ", expected", *webhookStatusCode)
 							time.Sleep(time.Second * 10)
 							continue
 						}
 
-						setSuccessMetrics(h.String(), begun)
+						setSuccessMetrics(h.Redacted(), begun)
 						log.Println("successfully triggered reload")
 						successfulReloadWebhook = true
 						break
 					}
 
 					if !successfulReloadWebhook {
-						setFailureMetrics(h.String(), "retries_exhausted")
+						setFailureMetrics(h.Redacted(), "retries_exhausted")
 						log.Println("error:", "Webhook reload retries exhausted")
 					}
 				}
